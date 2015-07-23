@@ -202,6 +202,7 @@ public class PythonCompletionProcessor extends AbstractCompletionProcessorWithCy
 
     /*dummy*/
 
+    @SuppressWarnings("unchecked")
     public ICompletionProposal[] computeCompletionProposals1(ITextViewer viewer, int documentOffset,
             String activationToken, String qualifier
             ) {

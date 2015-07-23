@@ -188,96 +188,101 @@ public class SimpleAssistProcessor implements IContentAssistProcessor {
                 updateStatus();
                 IDocument doc = viewer.getDocument();
                 String[] strs = PySelection.getActivationTokenAndQual(doc, offset, false);
-                File f = new File("src/11.code.python.tokens");
-                File f1 = new File("src/output_console.txt");
-                //f1.createNewFile();
-                FileWriter fw = new FileWriter(f1);
-
-                @SuppressWarnings("resource")
-                Scanner sc = new Scanner(f);
-                String dm = "[ ]";
-                //sc.useDelimiter(dm);
-                String line = sc.nextLine();
-                String[] tokens = line.split(dm);
-                int x = 0;
-                int length = tokens.length;
-
-                //                while (x < length - 1)
-                //                {
-                //                    if (tokens[x].equals("."))
-                //                    {
-                //                        tokens[x - 1] = tokens[x - 1] + ".";
-                //                        int z = 0;
-                //                        for (z = x; z < length - 1; z++)
-                //                        {
-                //                            tokens[z] = tokens[z + 1];
-                //                        }
-                //                        tokens[z] = "";
-                //
-                //                    }
-                //
-                //                    x++;
-                //
-                //                }
-                int tracker = 0;
-
-                for (String j : tokens)
+                int i = 0;
+                while (i < 200)
                 {
+                    File f = new File("/Users/siddhikacowlagi/Desktop/python_out/" + i + ".code.python.tokens");
+                    File f1 = new File("/Users/siddhikacowlagi/Desktop/analysis/output_" + i + ".txt");
+                    //f1.createNewFile();
+                    FileWriter fw = new FileWriter(f1);
 
-                    String activationToken;
-                    String qualifier;
-                    if (j.charAt(j.length() - 1) == '.')
+                    @SuppressWarnings("resource")
+                    Scanner sc = new Scanner(f);
+                    String dm = "[ ]";
+                    //sc.useDelimiter(dm);
+                    String line = sc.nextLine();
+                    String[] tokens = line.split(dm);
+                    int x = 0;
+                    int length = tokens.length;
+
+                    //                while (x < length - 1)
+                    //                {
+                    //                    if (tokens[x].equals("."))
+                    //                    {
+                    //                        tokens[x - 1] = tokens[x - 1] + ".";
+                    //                        int z = 0;
+                    //                        for (z = x; z < length - 1; z++)
+                    //                        {
+                    //                            tokens[z] = tokens[z + 1];
+                    //                        }
+                    //                        tokens[z] = "";
+                    //
+                    //                    }
+                    //
+                    //                    x++;
+                    //
+                    //                }
+                    int tracker = 0;
+
+                    for (String j : tokens)
                     {
-                        activationToken = j;
-                        qualifier = "";
-                    }
-                    else
-                    {
-                        activationToken = "";
-                        qualifier = "" + j.charAt(0);
-                    }
-                    //offset = tokens[tracker].length();
-                    //fw.write("*************Offset*********:" + offset + "\n");
-                    fw.write("*************Activation Token*********:" + activationToken + "\n");
-                    fw.write("*************Qualifier*********:" + qualifier + "\n");
-                    PySelection ps = edit.createPySelection();
-                    if (ps == null) {
-                        fw.close();
-                        return new ICompletionProposal[0];
-                    }
-                    List<ICompletionProposal> results = new ArrayList<ICompletionProposal>();
 
-                    for (ISimpleAssistParticipant participant : participants) {
-                        results.addAll(participant.computeCompletionProposals(activationToken, qualifier, ps, edit,
-                                offset));
-                    }
+                        String activationToken;
+                        String qualifier;
+                        if (j.charAt(j.length() - 1) == '.')
+                        {
+                            activationToken = j;
+                            qualifier = "";
+                        }
+                        else
+                        {
+                            activationToken = "";
+                            qualifier = "" + j.charAt(0);
+                        }
+                        //offset = tokens[tracker].length();
+                        //fw.write("*************Offset*********:" + offset + "\n");
+                        fw.write("*************Activation Token*********:" + activationToken + "\n");
+                        fw.write("*************Qualifier*********:" + qualifier + "\n");
+                        PySelection ps = edit.createPySelection();
+                        if (ps == null) {
+                            fw.close();
+                            return new ICompletionProposal[0];
+                        }
+                        List<ICompletionProposal> results = new ArrayList<ICompletionProposal>();
 
-                    //don't matter the result... next time we won't ask for simple stuff
-                    doCycle();
-                    if (results.size() == 0) {
-                        if (!lastCompletionAutoActivated || defaultAutoActivated(viewer, offset)
-                                || useAutocompleteOnAllAsciiCharsCache) {
-                            ICompletionProposal[] results_t1 = defaultPythonProcessor.computeCompletionProposals1(
-                                    viewer,
-                                    offset, activationToken, qualifier);
-                            for (ICompletionProposal i : results_t1) {
-                                fw.write("Proposal default activation block 1:" + i.getDisplayString() + "\n");
+                        for (ISimpleAssistParticipant participant : participants) {
+                            results.addAll(participant.computeCompletionProposals(activationToken, qualifier, ps, edit,
+                                    offset));
+                        }
+
+                        //don't matter the result... next time we won't ask for simple stuff
+                        doCycle();
+                        if (results.size() == 0) {
+                            if (!lastCompletionAutoActivated || defaultAutoActivated(viewer, offset)
+                                    || useAutocompleteOnAllAsciiCharsCache) {
+                                ICompletionProposal[] results_t1 = defaultPythonProcessor.computeCompletionProposals1(
+                                        viewer,
+                                        offset, activationToken, qualifier);
+                                for (ICompletionProposal icp : results_t1) {
+                                    fw.write("Proposal default activation block 1:" + icp.getDisplayString() + "\n");
+                                }
+                                //return results_t1;
                             }
-                            //return results_t1;
+                            //return new ICompletionProposal[0];
+                        } else {
+                            Collections.sort(results, IPyCodeCompletion.PROPOSAL_COMPARATOR);
+                            ICompletionProposal[] results_t2 = results.toArray(new ICompletionProposal[0]);
+                            for (ICompletionProposal icp : results_t2) {
+                                fw.write("Proposal Keyword Simple Assist:" + icp.getDisplayString() + "\n");
+                            }
+                            //return results_t2;
                         }
-                        //return new ICompletionProposal[0];
-                    } else {
-                        Collections.sort(results, IPyCodeCompletion.PROPOSAL_COMPARATOR);
-                        ICompletionProposal[] results_t2 = results.toArray(new ICompletionProposal[0]);
-                        for (ICompletionProposal i : results_t2) {
-                            fw.write("Proposal Keyword Simple Assist:" + i.getDisplayString() + "\n");
-                        }
-                        //return results_t2;
+                        fw.write("Actual string :" + tokens[tracker] + "\n");
+                        tracker++;
                     }
-                    fw.write("Actual string :" + tokens[tracker] + "\n");
-                    tracker++;
+                    i++;
+                    fw.close();
                 }
-                fw.close();
                 return new ICompletionProposal[0];
             }
         } catch (Exception e) {
